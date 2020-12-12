@@ -13,6 +13,7 @@ using RentalKendaraan.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RentalKendaraan_044.Models;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace RentalKendaraan
 {
@@ -38,12 +39,23 @@ namespace RentalKendaraan
             services.AddDbContext<RentKendaraanContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             //services.AddDefaultIdentity<IdentityUser>()
-            //    .AddEntityFrameworkStores<ApplicationDbContext>();
+            //    .AddEntityFrameworkStores<RentKendaraanContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultUI()
                 .AddEntityFrameworkStores<RentKendaraanContext>().AddDefaultTokenProviders();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("readonlypolicy", builder => builder.RequireRole("Admin", "Manager", "Kasir"));
+                options.AddPolicy("writepolicy", builder => builder.RequireRole("Admin", "Kasir"));
+                options.AddPolicy("editpolicy", builder => builder.RequireRole("Admin", "Kasir"));
+                options.AddPolicy("deletepolicy", builder => builder.RequireRole("Admin", "Kasir"));
+            });
+
+            services.AddScoped<Peminjaman>();
+            services.AddScoped<Pengembalian>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
